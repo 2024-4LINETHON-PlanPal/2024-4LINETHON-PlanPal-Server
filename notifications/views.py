@@ -26,7 +26,7 @@ class PlanNotificationView(APIView):
 class PromiseNotificationView(APIView):
     def get(self, request, *args, **kwargs):
         filtered_notifications = Notification.objects.filter(
-            notification_type__in=['vote', 'promise_accept'])
+            notification_type__in=['vote', 'promise_accept', 'promise_completed'])
 
         serializer = NotificationSerializer(filtered_notifications, many=True)
 

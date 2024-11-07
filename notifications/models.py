@@ -12,7 +12,8 @@ class Notification(models.Model):
         ('cheering', 'Cheering'),
         ('add_friend', 'Add_friend'),
         ('vote', 'Vote'),
-        ('promise_accept', 'Promise_accept')
+        ('promise_accept', 'Promise_accept'),
+        ('promise_completed', 'Promise_completed'),
     )
     recipient = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='notifications')
     message = models.TextField()
