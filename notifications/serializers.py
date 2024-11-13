@@ -24,3 +24,8 @@ class ReplySerializer(serializers.ModelSerializer):
         model = Reply
         fields = ['id', 'brag', 'author', 'memo', 'created_at']
         read_only_fields = ['id', 'author', 'created_at']
+
+class PromiseNotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'recipient', 'message', 'notification_type', 'object_id']

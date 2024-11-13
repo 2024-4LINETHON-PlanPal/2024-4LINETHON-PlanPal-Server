@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Notification, Brag, Reply
-from .serializers import NotificationSerializer,ReplySerializer,BragSerializer
+from .serializers import NotificationSerializer,ReplySerializer,BragSerializer, PromiseNotificationSerializer
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from plan.models import Plan
@@ -34,10 +34,8 @@ class PromiseNotificationView(APIView):
             recipient=recipient,
             notification_type__in=['vote', 'promise_accept', 'promise_completed']
             )
-
         
-
-        serializer = NotificationSerializer(filtered_notifications, many=True)
+        serializer = PromiseNotificationSerializer(filtered_notifications, many=True)
 
         return Response({"message":"약속 알림을 불러왔습니다.", "result":serializer.data}, status=status.HTTP_200_OK)
 
