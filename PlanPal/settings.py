@@ -117,7 +117,13 @@ CELERY_TIMEZONE = "Asia/Seoul"
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 
+from celery.schedules import crontab
+
 CELERY_BEAT_SCHEDULE = {
+    'send-daily-achievement': {
+        'task': 'tasks.send_daily_achievement',
+        'schedule' : crontab(hour=8, minute=0)
+    },
     'check-plan-deadlines': {
         'task': 'plan.tasks.check_plan_deadlines',
         'schedule': 3600.0, # 1시간마다 실행
@@ -126,15 +132,6 @@ CELERY_BEAT_SCHEDULE = {
         "task": "promise.tasks.update_promise_status",
         "schedule": 60.0,  # 1분마다 실행
     },
-}
-
-from celery.schedules import crontab
-
-CELERY_BEAT_SCHEDULE = {
-    'send-daily-achievement': {
-        'task': 'tasks.send_daily_achievement',
-        'schedule' : crontab(hour=8, minute=0)
-    }
 }
 
 
