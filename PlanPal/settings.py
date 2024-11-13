@@ -114,6 +114,8 @@ ASGI_APPLICATION = "PlanPal.asgi.application"
 CELERY_BROKER_URL = "redis://0.0.0.0:6379/0"
 CELERY_RESULT_BACKEND = "redis://0.0.0.0:6379/0"
 CELERY_TIMEZONE = "Asia/Seoul"
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
 
 CELERY_BEAT_SCHEDULE = {
     'check-plan-deadlines': {
