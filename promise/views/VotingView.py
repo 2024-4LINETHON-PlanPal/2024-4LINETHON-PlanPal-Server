@@ -2,9 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.utils import timezone
+from django.contrib.contenttypes.models import ContentType
 
 from promise.models import Promise, PromiseOption
 from users.models import Profile
+from notifications.models import Notification
 
 from promise.serializers import PromiseSerializer
 
@@ -27,6 +29,20 @@ class VotingChageStatusView(APIView):
         # status 변경
         promise.status = "voting"
         promise.save()
+
+        # 참여자들에게 알림 전송
+        recipients_objects = promise.members.all()
+        recipients = Profile.objects.filter(username__in=recipients_objects.values('username'))
+
+        content_type = ContentType.objects.get_for_model(promise)
+        for recipient in recipients:
+            Notification.objects.create(
+                recipient=recipient,
+                message=f"{promise.title} 약속 투표를 진행해주세요.",
+                notification_type='vote',
+                content_type=content_type,
+                object_id=promise.id
+            )
 
         serializer = PromiseSerializer(promise)
 
@@ -81,6 +97,19 @@ class VotingView(APIView):
 def isAllVote(promise):
     count = sum(option.vote_members.count() for option in promise.promise_options.all())
     if count >= promise.members.count() + 1:
+        # 참여자들에게 알림 전송
+        recipients_objects = promise.members.all()
+        recipients = Profile.objects.filter(username__in=recipients_objects.values('username'))
+
+        content_type = ContentType.objects.get_for_model(promise)
+        for recipient in recipients:
+            Notification.objects.create(
+                recipient=recipient,
+                message=f"{promise.title} 약속을 확정해주세요.",
+                notification_type='promise_accept',
+                content_type=content_type,
+                object_id=promise.id
+            )
         return True
     return False
 
@@ -138,5 +167,19 @@ def is24HoursAfter():
         promise.status = "confirming"
         final_option = voteResult(promise)
         promise.promise_options.set([final_option]) # 선정된 option으로 변경
+
+        # 참여자들에게 알림 전송
+        recipients_objects = promise.members.all()
+        recipients = Profile.objects.filter(username__in=recipients_objects.values('username'))
+
+        content_type = ContentType.objects.get_for_model(promise)
+        for recipient in recipients:
+            Notification.objects.create(
+                recipient=recipient,
+                message=f"{promise.title} 약속을 확정해주세요.",
+                notification_type='promise_accept',
+                content_type=content_type,
+                object_id=promise.id
+            )
 
         promise.save()

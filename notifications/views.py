@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Notification, Brag, Reply
-from .serializers import NotificationSerializer,ReplySerializer,BragSerializer
+from .serializers import NotificationSerializer,ReplySerializer,BragSerializer, PromiseNotificationSerializer
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from plan.models import Plan
@@ -11,6 +11,10 @@ from users.models import Profile
 from django.contrib.contenttypes.models import ContentType
 from plan.serializers import PlanSerializer
 from django.contrib.auth import get_user_model
+
+from datetime import timedelta
+from django.utils import timezone
+from promise.models import Promise
 
 User = get_user_model()
 
@@ -26,17 +30,39 @@ class PlanNotificationView(APIView):
 
         return Response({"message":"계획 알림을 불러왔습니다.", "result":serializer.data}, status=status.HTTP_200_OK)
 
+
 class PromiseNotificationView(APIView):
     def get(self, request, recipient_username, *args, **kwargs):
         recipient = get_object_or_404(User, username=recipient_username)
 
         filtered_notifications = Notification.objects.filter(
             recipient=recipient,
-            notification_type__in=['vote', 'promise_accept'])
+            notification_type__in=['vote', 'promise_accept', 'promise_completed']
+        )
 
-        serializer = NotificationSerializer(filtered_notifications, many=True)
+        # vote인 경우 남은 시간까지 더해서 리턴
+        results = []
+        
+        for notification in filtered_notifications:
+            serialized_data = PromiseNotificationSerializer(notification).data
 
-        return Response({"message":"약속 알림을 불러왔습니다.", "result":serializer.data}, status=status.HTTP_200_OK)
+            if notification.notification_type == 'vote' and isinstance(notification.content_object, Promise):
+                promise = notification.content_object
+                # 약속 생성된 지 24시간을 기준으로 남은 시간 계산
+                time_elapsed = timezone.now() - promise.created_at
+                remaining_time = timedelta(hours=24) - time_elapsed
+                
+                # 남은 시간이 양수일 때만 HH:MM 형식으로 추가
+                if remaining_time.total_seconds() > 0:
+                    hours, remainder = divmod(remaining_time.seconds, 3600)
+                    minutes, _ = divmod(remainder, 60)
+                    serialized_data['remaining_time'] = f"{hours:02}:{minutes:02}"
+                else:
+                    serialized_data['remaining_time'] = "투표 시간이 만료되었습니다."
+
+            results.append(serialized_data)
+
+        return Response({"message": "약속 알림을 불러왔습니다.", "result": results}, status=status.HTTP_200_OK)
 
 class FriendNotificationView(APIView):
     def get(self, request, recipient_username, *args, **kwargs):
