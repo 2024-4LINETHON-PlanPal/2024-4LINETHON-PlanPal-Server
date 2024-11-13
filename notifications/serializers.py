@@ -6,15 +6,8 @@ from plan.serializers import PlanSerializer
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
-        fields = ['id', 'recipient', 'message', 'created_at', 'content_type', 'object_id', 'content_object', 'notification_type']
+        fields = ['id', 'recipient', 'message', 'notification_type']
 
-        def to_representation(self, instance):
-            representation = super().to_representation(instance)
-
-            if instance.content_object:
-                representation['related_object'] = str(instance.content_object)
-        
-            return representation
 
 class BragSerializer(serializers.ModelSerializer):
     author = ProfileSerializer(many=True, read_only=True)

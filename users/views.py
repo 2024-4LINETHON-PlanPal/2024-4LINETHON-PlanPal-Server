@@ -8,15 +8,29 @@ from rest_framework.authentication import SessionAuthentication
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from notifications.models import Notification
-
+from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 
-
 from .serializers import FriendsSerializer
+
+User = get_user_model()
 
 class RegisterView(generics.CreateAPIView):
     queryset = Profile.objects.all()
     serializer_class = Register
+
+class UsernameCheckView(APIView):
+    def get(self, request, *args, **kwargs):
+        username = request.query_params.get('username', None)
+        
+        if not username:
+            return Response({"message": "아이디(username)를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 아이디 중복 여부 확인
+        if Profile.objects.filter(username=username).exists():
+            return Response({"message": "이미 존재하는 아이디입니다."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({"message": "사용 가능한 아이디입니다."}, status=status.HTTP_200_OK)
 
 class LoginView(generics.GenericAPIView):
     serializer_class = Login
@@ -63,7 +77,9 @@ class FriendsView(APIView):
 
         Notification.objects.create(
             recipient=target_user,
-            message=f"{user.username}님이 {target_user.username}님을 친구 추가 하셨어요."
+            message=f"{user.username}님이 {target_user.username}님을 친구 추가 하셨어요. \n {target_user}님을 친구 추가 하고 싶으시다면 클릭해주세요." ,
+            notification_type="add_friend",
+            action_type='follow'
         )
 
         return Response({'message': f"{target_user.username}님을 친구 추가했습니다."}, status=status.HTTP_201_CREATED)
@@ -86,3 +102,14 @@ class FriendsView(APIView):
         user.friends.remove(target_user)
         serializer = FriendsSerializer(user.friends, many=True)
         return Response({'message': f"{target_user.username}님을 친구 목록에서 삭제했습니다.", "result": serializer.data}, status=status.HTTP_200_OK)
+
+    def get(self, request, my_username, format=None):
+        # GET 메서드: 친구 목록 조회 로직
+        try:
+            user = Profile.objects.get(username=my_username)
+        except ObjectDoesNotExist:
+            return Response({'error': f"프로필 '{my_username}'을(를) 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+        # 친구 목록 직렬화
+        serializer = FriendsSerializer(user.friends.all(), many=True)
+        return Response({'message': '친구 리스트를 불러왔습니다.', 'result':serializer.data}, status=status.HTTP_200_OK)

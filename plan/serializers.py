@@ -5,6 +5,9 @@ from django.shortcuts import get_object_or_404
 
 from promise.serializers import ProfileSerializer, PromiseSerializer
 
+import pytz
+from django.utils import timezone
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -15,7 +18,7 @@ class PlanSerializer(serializers.ModelSerializer):
     participant = ProfileSerializer(many=True, read_only=True)
     is_completed = serializers.BooleanField(required=False)
     promise_id = serializers.PrimaryKeyRelatedField(read_only=True)
-    
+
     class Meta:
         model = Plan
         fields = ['id', 'title', 'category', 'start', 'end', 'participant', 'memo', 'is_completed', 'promise_id']

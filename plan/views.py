@@ -100,17 +100,21 @@ class PlanViewSet(viewsets.ModelViewSet):
         serializer = PlanSerializer(data=request.data)
         
         if serializer.is_valid():
+            # start와 end 시간을 KST로 변환
+            start_time = serializer.validated_data.get('start').astimezone(timezone.get_current_timezone())
+            end_time = serializer.validated_data.get('end').astimezone(timezone.get_current_timezone())
+
             # Plan 객체 생성
             plan = Plan.objects.create(
                 author=user,
                 title=serializer.validated_data.get('title'),
                 category=category,
-                start=serializer.validated_data.get('start'),
-                end=serializer.validated_data.get('end'),
+                start=start_time,
+                end=end_time,
                 memo=serializer.validated_data.get('memo'),
                 is_completed=serializer.validated_data.get('is_completed'),
             )
-            self.plan_deadline(plan)
+            
 
             # participant id 모두 객체로 변환
             participants = Profile.objects.filter(username__in=participant_usernames)
@@ -140,11 +144,15 @@ class PlanViewSet(viewsets.ModelViewSet):
         serializer = PlanSerializer(plan, data=request.data, partial=True)  # partial=True는 부분 업데이트 !
 
         if serializer.is_valid():
+            # start와 end 시간을 KST로 변환 (필요 시)
+            start_time = serializer.validated_data.get('start').astimezone(timezone.get_current_timezone()) if 'start' in serializer.validated_data else plan.start.astimezone(timezone.get_current_timezone())
+            end_time = serializer.validated_data.get('end').astimezone(timezone.get_current_timezone()) if 'end' in serializer.validated_data else plan.end.astimezone(timezone.get_current_timezone())
+
             # Plan 객체 업데이트
             updated_plan = serializer.save(
                 category=category,  # 카테고리 업데이트
             )
-            self.plan_deadline(updated_plan)
+            
 
             # participant id 모두 객체로 변환
             participants = Profile.objects.filter(username__in=participant_usernames)
@@ -304,11 +312,11 @@ class PlanViewSet(viewsets.ModelViewSet):
         plan_end = plan.end.astimezone(timezone.get_current_timezone())
         deadline = plan_end - now
 
-        if deadline <= timezone.timedelta(hours=1) and not plan.is_completed:
+        if deadline > timezone.timedelta(0) and deadline <= timezone.timedelta(hours=1) and not plan.is_completed:
             Notification.objects.create(
                 recipient=plan.author,
                 message=f"{plan.title} 마감시간까지 1시간 남았습니다! 잊지 말고 계획을 실행해주세요!",
-                notification_type='plan'
+                notification_type='plan_deadline'
             )
 
             channel_layer = get_channel_layer()
@@ -316,22 +324,19 @@ class PlanViewSet(viewsets.ModelViewSet):
                 f"user_{plan.author.id}",
                 {
                     'type': 'send_notification',
-                    'message': message,
+                    'message': f"{plan.title} 마감시간까지 1시간 남았습니다! 잊지 말고 계획을 실행해주세요!",
                 }
             )
 
-    @action(detail=False, methods=['get'])
-    def daily_achievement(self, request, username=None):
-        user = get_object_or_404(User, username=username)
+    def daily_achievement(self, request):
         yesterday = timezone.now().date() - timezone.timedelta(days=1)
         total_plans = Plan.objects.filter(author=user, start__date=yesterday).count()
         completed_plans = Plan.objects.filter(author=user, start__date=yesterday, is_completed=True).count()
         
         Notification.objects.create(
             recipient=user,
-            message=f"어제는 {total_plans}개의 계획 중에서 {completed_plans}개의 계획을 달성하셨습니다! " + 
-            f"24년 {yesterday.month}월 {yesterday.day}일의 {user.nickname}님은 성실하셨네요!",
-            notification_type='plan'
+            message=f"어제는 {total_plans}개의 계획 중에서 {completed_plans}개의 계획을 달성하셨습니다! \n {yesterday.year}년 {yesterday.month}월 {yesterday.day}일의 {user.nickname}님은 성실하셨네요!",
+            notification_type='daily_achievement'
         )
 
         channel_layer = get_channel_layer()

@@ -51,26 +51,33 @@ INSTALLED_APPS = [
 ASGI_APPLICATION = 'PlanPal.asagiapplication'
 
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
             "hosts": [("127.0.0.1", 6379)],
         },
     },
 }
 
 CORS_ALLOW_ALL_ORIGIN = True
+CORS_ORIGIN_ALLOW_ALL = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ORIGIN_WHITELIST = [
+    "https://planpal.kro.kr",
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'PlanPal.urls'
 
@@ -95,6 +102,7 @@ ASGI_APPLICATION = "PlanPal.asgi.application"
 
 CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
 CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
+CELERY_TIMEZONE = "Asia/Seoul"
 
 CELERY_BEAT_SCHEDULE = {
     "update_promise_status_every_1_minute": {
@@ -103,13 +111,20 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
-        },
+CELERY_BEAT_SCHEDULE = {
+    'check-plan-deadlines': {
+        'task': 'plan.tasks.check_plan_deadlines',
+        'schedule': 3600.0, # 1시간마다 실행
     },
+}
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'send-daily-achievement': {
+        'task': 'tasks.send_daily_achievement',
+        'schedule' : crontab(hour=8, minute=0)
+    }
 }
 
 
@@ -149,7 +164,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ko-kr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 

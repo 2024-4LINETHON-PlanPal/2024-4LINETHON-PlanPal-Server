@@ -22,6 +22,7 @@ class Notification(models.Model):
     object_id = models.PositiveIntegerField(null=True, blank=True) # 관련된 객체의 ID를 저장하는 필드
     content_object = GenericForeignKey('content_type', 'object_id') # content_type과 object_id를 통해 실제 객체에 접근
     notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, default="plan")
+    action_type = models.CharField(max_length=50, default='read')
 
     class Meta:
         ordering = ['-created_at']

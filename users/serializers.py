@@ -15,20 +15,17 @@ class Register(serializers.ModelSerializer):
         validators = [validate_password]
     )
 
-    password2 = serializers.CharField(write_only=True, required=True,)
-
     nickname = serializers.CharField(required=True)
     
     class Meta:
         model = Profile
-        fields = ('username', 'password', 'password2','nickname')
+        fields = ('username', 'password','nickname')
 
-    def validate(self, data):
-        if data['password'] != data['password2']:
-            raise serializers.ValidationError(
-                {"password":"비밀번호가 일치하지 않습니다."}
-            )
-        return data
+    # 닉네임 중복 검사
+    def validate_nickname(self, value):
+        if Profile.objects.filter(nickname=value).exists():
+            raise serializers.ValidationError("이미 존재하는 닉네임입니다.")
+        return value
 
     def create(self, validated_data):
         user = Profile.objects.create(
@@ -58,6 +55,16 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ('nickname', 'image', 'intro')
+
+    # 닉네임 중복 검사
+    def validate_nickname(self, value):
+        request_user = self.instance
+        
+        # 다른 사용자의 닉네임과 중복되는지 확인
+        if Profile.objects.filter(nickname=value).exclude(id=request_user.id).exists():
+            raise serializers.ValidationError("이미 존재하는 닉네임입니다.")
+        
+        return value
     
     def update(self, instance, validated_data):
         instance.nickname = validated_data.get('nickname', instance.nickname)
