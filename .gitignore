@@ -1,6 +1,15 @@
 # Created by https://www.toptal.com/developers/gitignore/api/django
 # Edit at https://www.toptal.com/developers/gitignore?templates=django
 
+# celery DB 추가
+celerybeat-schedule.db
+celerybeat-schedule.bak
+celerybeat-schedule.bat
+celerybeat-schedule.dir
+dump.rdb
+worker
+celery
+
 ### Django ###
 *.log
 *.pot
@@ -174,6 +183,3 @@ cython_debug/
 
 # End of https://www.toptal.com/developers/gitignore/api/django
 
-# celery DB 추가
-celerybeat-schedule.db
-dump.rdb
