@@ -30,6 +30,20 @@ class VotingChageStatusView(APIView):
         promise.status = "voting"
         promise.save()
 
+        # 참여자들에게 알림 전송
+        recipients_objects = promise.members.all()
+        recipients = Profile.objects.filter(username__in=recipients_objects.values('username'))
+
+        content_type = ContentType.objects.get_for_model(promise)
+        for recipient in recipients:
+            Notification.objects.create(
+                recipient=recipient,
+                message=f"{promise.title} 약속 투표를 진행해주세요.",
+                notification_type='vote',
+                content_type=content_type,
+                object_id=promise.id
+            )
+
         serializer = PromiseSerializer(promise)
 
         return Response({"message": "투표하기 상태 변경에 성공하였습니다.",  "result": serializer.data}, status=status.HTTP_200_OK)
