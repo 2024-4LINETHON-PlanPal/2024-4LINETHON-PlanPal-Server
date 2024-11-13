@@ -73,7 +73,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ORIGIN_WHITELIST = "https://planpal.kro.kr"
+CORS_ORIGIN_WHITELIST = [
+    "https://planpal.kro.kr",
+]
+
 CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'PlanPal.urls'
