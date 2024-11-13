@@ -1,10 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.contrib.contenttypes.models import ContentType
 
 from promise.models import Promise
 from users.models import Profile
 from plan.models import Plan, Category
+from notifications.models import Notification
 
 from promise.serializers import PromiseSerializer
 
@@ -83,6 +85,22 @@ def isAllReply(promise):
     if promise.accept_members.count() + promise.reject_members.count() == promise.members.count():
         promise.status = "completed"
         promise.save()
+
+        # 참여자들에게 알림 전송
+        recipients_objects = promise.accept_members.all()
+        recipients = Profile.objects.filter(username__in=recipients_objects.values('username'))
+
+        content_type = ContentType.objects.get_for_model(promise)
+        for recipient in recipients:
+            Notification.objects.create(
+                recipient=recipient,
+                message=f"{promise.title} 약속이 확정되었습니다.",
+                notification_type='promise_completed',
+                content_type=content_type,
+                object_id=promise.id
+            )
+
+
         return True
     
     return False
