@@ -160,7 +160,8 @@ def findBestOption(options):
 def is24HoursAfter():
     promises = Promise.objects.filter(
             status="voting",
-            created_at__lte=timezone.now() - timezone.timedelta(hours=24)
+            # created_at__lte=timezone.now() - timezone.timedelta(hours=24)
+            created_at__lte=timezone.now() - timezone.timedelta(minutes=1)
         )
     
     for promise in promises:
