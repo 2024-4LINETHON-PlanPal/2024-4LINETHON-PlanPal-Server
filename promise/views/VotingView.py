@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 
 from promise.models import Promise, PromiseOption
 from users.models import Profile
@@ -159,28 +160,29 @@ def findBestOption(options):
 # 24시간이 지났는지 확인하는 함수
 def is24HoursAfter():
     promises = Promise.objects.filter(
-            status="voting",
-            # created_at__lte=timezone.now() - timezone.timedelta(hours=24)
-            created_at__lte=timezone.now() - timezone.timedelta(minutes=1)
-        )
+        status="voting",
+        created_at__lte=timezone.now() - timezone.timedelta(minutes=1)
+    )
     
-    for promise in promises:
-        promise.status = "confirming"
-        final_option = voteResult(promise)
-        promise.promise_options.set([final_option]) # 선정된 option으로 변경
+    with transaction.atomic():  # 트랜잭션 시작
+        for promise in promises:
+            promise.refresh_from_db()  # DB에서 최신 데이터로 갱신
+            promise.status = "confirming"
+            final_option = voteResult(promise)
+            promise.promise_options.set([final_option])
 
-        # 참여자들에게 알림 전송
-        recipients_objects = promise.members.all()
-        recipients = Profile.objects.filter(username__in=recipients_objects.values('username'))
+            # 참여자들에게 알림 전송
+            recipients_objects = promise.members.all()
+            recipients = Profile.objects.filter(username__in=recipients_objects.values('username'))
 
-        content_type = ContentType.objects.get_for_model(promise)
-        for recipient in recipients:
-            Notification.objects.create(
-                recipient=recipient,
-                message=f"{promise.title} 약속을 확정해주세요.",
-                notification_type='promise_accept',
-                content_type=content_type,
-                object_id=promise.id
-            )
+            content_type = ContentType.objects.get_for_model(promise)
+            for recipient in recipients:
+                Notification.objects.create(
+                    recipient=recipient,
+                    message=f"{promise.title} 약속을 확정해주세요.",
+                    notification_type='promise_accept',
+                    content_type=content_type,
+                    object_id=promise.id
+                )
 
-        promise.save()
+            promise.save()  
