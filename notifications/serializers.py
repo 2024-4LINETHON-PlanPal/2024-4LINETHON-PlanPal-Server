@@ -8,7 +8,6 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = ['id', 'recipient', 'message', 'notification_type']
 
-
 class BragSerializer(serializers.ModelSerializer):
     author = ProfileSerializer(many=True, read_only=True)
     recipient = ProfileSerializer(many=True, read_only=True)
