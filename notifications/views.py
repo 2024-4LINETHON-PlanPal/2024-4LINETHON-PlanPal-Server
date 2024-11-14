@@ -156,6 +156,6 @@ class NotificationActionView(APIView):
 
             if not request.user.friends.filter(username=target_user.username).exists():
                 request.user.friends.add(target_user)
-                return Response({"message":f"{target_user.username}을 친구 추가 했습니다."})
+                return Response({"message":f"{target_user.nickname}을 친구 추가 했습니다."})
 
         return Response({'error':'잘못된 요청입니다.'}, status=status.HTTP_400_BAD_REQUEST)

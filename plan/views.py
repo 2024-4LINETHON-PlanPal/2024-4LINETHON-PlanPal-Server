@@ -358,7 +358,7 @@ class PlanViewSet(viewsets.ModelViewSet):
         
         Notification.objects.create(
             recipient=user,
-            message=f"어제는 {total_plans}개의 계획 중에서 {completed_plans}개의 계획을 달성하셨습니다! \n {yesterday.year}년 {yesterday.month}월 {yesterday.day}일의 {user.nickname}님은 성실하셨네요!",
+            message=f"어제는 {total_plans}개의 계획 중 {completed_plans}개의 계획을 달성하셨습니다! \n {yesterday.year}년 {yesterday.month}월 {yesterday.day}일의 {user.nickname}님은 성실하셨네요!",
             notification_type='daily_achievement'
         )
 
