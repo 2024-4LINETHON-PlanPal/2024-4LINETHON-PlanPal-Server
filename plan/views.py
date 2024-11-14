@@ -274,10 +274,11 @@ class PlanViewSet(viewsets.ModelViewSet):
         else:
             current_date = timezone.now().date()
 
+        # 24시간 동안 10분 간격의 타임 슬롯 생성
         time_slots = {f"{hour:02d}:{minute:02d}" : [] for hour in range(24) for minute in range(0,60,10)}   # 0시 ~ 23시
         categories = {}
 
-        plans = self.get_queryset().filter(author=user, start__date=current_date).order_by('start')
+        plans = self.get_queryset().filter(author=user).order_by('start')
 
         for plan in plans:
             start_hour = plan.start.astimezone(timezone.get_current_timezone())  # 로컬 시간대로 변환
@@ -286,13 +287,35 @@ class PlanViewSet(viewsets.ModelViewSet):
             # 시리얼라이저로 반환
             plan_data = PlanSerializer(plan).data 
 
-            # current_slot을 start_hour로 설정
+            # 시작일과 종료일이 다를 경우 처리
             current_slot = start_hour.replace(minute=start_hour.minute // 10 * 10, second=0, microsecond=0)
-            while current_slot <= end_hour:
-                slot_key = current_slot.strftime("%H:%M")
-                if slot_key in time_slots:
-                    time_slots[slot_key].append(plan_data)
-                current_slot += timedelta(minutes=10)
+
+            # 현재 날짜가 일정의 시작일인 경우
+            if current_date == start_hour.date():
+                while current_slot <= end_hour and current_slot.date() == current_date:
+                    slot_key = current_slot.strftime("%H:%M")
+                    if slot_key in time_slots:
+                        time_slots[slot_key].append(plan_data)
+                    current_slot += timedelta(minutes=10)
+
+            # 현재 날짜가 일정의 종료일인 경우
+            elif current_date == end_hour.date():
+                current_slot = timezone.make_aware(datetime.combine(current_date, datetime.min.time()))
+                while current_slot <= end_hour:
+                    slot_key = current_slot.strftime("%H:%M")
+                    if slot_key in time_slots:
+                        time_slots[slot_key].append(plan_data)
+                    current_slot += timedelta(minutes=10)
+
+            # 현재 날짜가 일정의 중간 날짜인 경우(시작일과 종료일 사이)
+            elif start_hour.date() < current_date < end_hour.date():
+                current_slot = timezone.make_aware(datetime.combine(current_date, datetime.min.time()))
+                end_of_day = timezone.make_aware(datetime.combine(current_date, datetime.max.time()))
+                while current_slot <= end_of_day:
+                    slot_key = current_slot.strftime("%H:%M")
+                    if slot_key in time_slots:
+                        time_slots[slot_key].append(plan_data)
+                    current_slot += timedelta(minutes=10)
 
             category_title = plan.category.title if plan.category else "Uncategorized"
             if category_title not in categories:
@@ -300,7 +323,7 @@ class PlanViewSet(viewsets.ModelViewSet):
             categories[category_title].append(plan_data)
 
         return Response({
-            "message": "주간 캘린더 조회에 성공했습니다.",
+            "message": "일간 캘린더 조회에 성공했습니다.",
             "result": {
                 "time_slots": time_slots,
             "categories": categories
