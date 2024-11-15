@@ -12,7 +12,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         fields = ['id', 'recipient', 'message', 'notification_type', 'plan_title', 'friend_nickname']
 
     def get_plan_title(self, obj):
-        if obj.notification_type in ['cheering', 'brag']:
+        if obj.notification_type == 'brag':
             try:
                 reply = Reply.objects.get(id=obj.object_id)
                 return reply.brag.plan.title 
@@ -21,7 +21,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         return None
 
     def get_friend_nickname(self, obj):
-        if obj.notification_type in ['cheering', 'brag']:
+        if obj.notification_type == 'brag':
             try:
                 reply = Reply.objects.get(id=obj.object_id)
                 return reply.author.nickname
