@@ -97,7 +97,8 @@ def isAllReply(promise):
                 message=f"{promise.title} 약속이 확정되었습니다.",
                 notification_type='promise_completed',
                 content_type=content_type,
-                object_id=promise.id
+                object_id=promise.id,
+                author=promise.user
             )
 
         # 주최자에게도 알림 전송
@@ -106,7 +107,8 @@ def isAllReply(promise):
                 message=f"{promise.title} 약속이 확정되었습니다.",
                 notification_type='promise_completed',
                 content_type=content_type,
-                object_id=promise.id
+                object_id=promise.id,
+                author=promise.user
             )
 
 

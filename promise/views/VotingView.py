@@ -42,7 +42,8 @@ class VotingChageStatusView(APIView):
                 message=f"{promise.title} 약속 투표를 진행해주세요.",
                 notification_type='vote',
                 content_type=content_type,
-                object_id=promise.id
+                object_id=promise.id,
+                author=promise.user
             )
 
         serializer = PromiseSerializer(promise)
@@ -109,7 +110,8 @@ def isAllVote(promise):
                 message=f"{promise.title} 약속을 확정해주세요.",
                 notification_type='promise_accept',
                 content_type=content_type,
-                object_id=promise.id
+                object_id=promise.id,
+                author=promise.user
             )
         return True
     return False
@@ -183,7 +185,8 @@ def is24HoursAfter():
                     message=f"{promise.title} 약속을 확정해주세요.",
                     notification_type='promise_accept',
                     content_type=content_type,
-                    object_id=promise.id
+                    object_id=promise.id,
+                    author=promise.user
                 )
 
             promise.save()  

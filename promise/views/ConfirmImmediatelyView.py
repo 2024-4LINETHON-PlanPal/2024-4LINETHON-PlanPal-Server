@@ -66,7 +66,8 @@ class ConfirmImmediatelyView(APIView):
                 message=f"{promise.title} 약속을 확정해주세요.",
                 notification_type='promise_accept',
                 content_type=content_type,
-                object_id=promise.id
+                object_id=promise.id,
+                author = promise.user
             )
 
         return Response({"message": "내 마음대로 확정하기에 성공하였습니다. 나의 일정에 약속이 추가되었습니다.", "result": serializer.data}, status=status.HTTP_200_OK)
