@@ -1,10 +1,10 @@
 # 2024-4LINETHON-PlanPal-Server
 
 ### 멋쟁이사자처럼 대학 4호선톤
-**"The next stop is, growling to line 4 growth station.” <br/>
-2024년 11월 16일, 동국대학교 멋쟁이사자처럼 주관 대학 연합 해커톤 본선 진출작**
+`"The next stop is, growling to line 4 growth station.”` <br/>
+`2024년 11월 16일, 동국대학교 멋쟁이사자처럼 주관 대학 연합 해커톤 본선 진출작`
+<br/>
 
-### 멤버
 | 이름     | 개발분야  | 개인 레포                                         | 역할                    |
 | -------- | --------- | ------------------------------------------------- | ------------------------- |
 | ✨경민서 | Back-end  | [mxinseo](https://github.com/mxinseo)  | 약속 관련 기능 구현, 약속 알림 기능 구현, AWS 배포         |
