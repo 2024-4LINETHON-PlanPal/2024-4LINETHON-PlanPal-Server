@@ -1,8 +1,8 @@
 # 2024-4LINETHON-PlanPal-Server
 
 ### 멋쟁이사자처럼 대학 4호선톤
-"The next stop is, growling to line 4 growth station.” <br/>
-2024년 11월 16일, 동국대학교 멋쟁이사자처럼 주관 대학 연합 해커톤 출품작
+**"The next stop is, growling to line 4 growth station.” <br/>
+2024년 11월 16일, 동국대학교 멋쟁이사자처럼 주관 대학 연합 해커톤 본선 진출작**
 
 ![6_2차-01](https://github.com/user-attachments/assets/e698df4a-89e7-451f-8bc3-6852d9533c0a)
 ![6_2차-02](https://github.com/user-attachments/assets/15bc6756-cfd6-421c-827e-fc17cc3426ed)
