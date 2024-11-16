@@ -23,6 +23,7 @@ class Notification(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id') # content_type과 object_id를 통해 실제 객체에 접근
     notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, default="plan")
     action_type = models.CharField(max_length=50, default='read')
+    author = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="notification_author")
 
     class Meta:
         ordering = ['-created_at']

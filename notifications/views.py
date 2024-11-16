@@ -105,7 +105,8 @@ class BragView(APIView):
                     message=f"{user.nickname}님이 자신의 계획을 떠벌리셨습니다. \n '{brag.memo}'",
                     notification_type='brag',
                     content_type=content_type,
-                    object_id=plan.id
+                    object_id=plan.id,
+                    author=user
                 )
                 
             return Response({"message":"떠벌림이 성공적으로 전송되었습니다.", "result": {"brag_id": brag.id, "memo": serializer.validated_data.get('memo')}}, status=status.HTTP_200_OK)
@@ -135,7 +136,8 @@ class ReplyView(APIView):
                 message=f"{user.nickname}님께서 {brag.author.nickname}님을 응원하셨어요. \n '{reply.memo}'",
                 notification_type='cheering',
                 content_type=content_type,
-                object_id=reply.id
+                object_id=reply.id,
+                author=user
             )
             
             return Response({"message": "답변이 성공적으로 등록되었습니다.", "result": serializer.data}, status=status.HTTP_201_CREATED)
