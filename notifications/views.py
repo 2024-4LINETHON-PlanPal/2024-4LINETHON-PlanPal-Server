@@ -105,7 +105,7 @@ class BragView(APIView):
                     message=f"{user.nickname}님이 자신의 계획을 떠벌리셨습니다. \n '{brag.memo}'",
                     notification_type='brag',
                     content_type=content_type,
-                    object_id=plan.id,
+                    object_id=brag.id,
                     author=user
                 )
                 

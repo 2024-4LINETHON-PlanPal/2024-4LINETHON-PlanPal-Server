@@ -3,6 +3,7 @@ from .models import Notification, Brag, Reply
 from users.serializers import ProfileSerializer
 from plan.serializers import PlanSerializer
 from users.models import Profile
+from plan.models import Plan
 
 class NotificationSerializer(serializers.ModelSerializer):
     plan_title = serializers.SerializerMethodField()
@@ -17,9 +18,9 @@ class NotificationSerializer(serializers.ModelSerializer):
     def get_plan_title(self, obj):
         if obj.notification_type in ['add_friend', 'brag']:
             try:
-                brag = Brag.objects.get(id=obj.object_id)
-                return brag.plan.title 
-            except Brag.DoesNotExist:
+                plan = Plan.objects.get(id=obj.object_id)
+                return plan.title 
+            except Plan.DoesNotExist:
                 return None
         return None
 
@@ -35,9 +36,9 @@ class NotificationSerializer(serializers.ModelSerializer):
     def get_friend_nickname(self, obj):
         if obj.notification_type in ['add_friend', 'brag']:
             try:
-                brag = Brag.objects.get(id=obj.author.id)
-                return brag.author.nickname
-            except Brag.DoesNotExist:
+                user = Profile.objects.get(id=obj.author.id)
+                return user.nickname
+            except Profile.DoesNotExist:
                 return None
         return None
 
