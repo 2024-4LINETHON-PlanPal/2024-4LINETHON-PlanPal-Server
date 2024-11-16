@@ -4,6 +4,13 @@
 **"The next stop is, growling to line 4 growth station.” <br/>
 2024년 11월 16일, 동국대학교 멋쟁이사자처럼 주관 대학 연합 해커톤 본선 진출작**
 
+### 멤버
+| 이름     | 개발분야  | 개인 레포                                         | 역할                    |
+| -------- | --------- | ------------------------------------------------- | ------------------------- |
+| ✨경민서 | Back-end  | [mxinseo](https://github.com/mxinseo)  | 약속 관련 기능 구현, 약속 알림 기능 구현, AWS 배포         |
+| ✨이가은 | Back-end | [egaeuni](https://github.com/egaeuni)  | 유저 관련 기능, 일정 관리 기능, 유저&일정 알림 기능 구현 |
+
+
 ![6_2차-01](https://github.com/user-attachments/assets/e698df4a-89e7-451f-8bc3-6852d9533c0a)
 ![6_2차-02](https://github.com/user-attachments/assets/15bc6756-cfd6-421c-827e-fc17cc3426ed)
 ![6_2차-03](https://github.com/user-attachments/assets/3726bc83-572b-4cd9-9c60-a8445e4a2a61)
