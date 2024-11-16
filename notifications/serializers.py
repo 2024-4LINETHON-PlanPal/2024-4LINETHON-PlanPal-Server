@@ -14,18 +14,18 @@ class NotificationSerializer(serializers.ModelSerializer):
     def get_plan_title(self, obj):
         if obj.notification_type == 'brag':
             try:
-                reply = Reply.objects.get(id=obj.object_id)
-                return reply.brag.plan.title 
-            except Reply.DoesNotExist:
+                brag = Brag.objects.get(id=obj.object_id)
+                return brag.plan.title 
+            except Brag.DoesNotExist:
                 return None
         return None
 
     def get_friend_nickname(self, obj):
         if obj.notification_type == 'brag':
             try:
-                reply = Reply.objects.get(id=obj.object_id)
-                return reply.author.nickname
-            except Reply.DoesNotExist:
+                brag = Brag.objects.get(id=obj.object_id)
+                return brag.author.nickname
+            except Brag.DoesNotExist:
                 return None
         return None
 
